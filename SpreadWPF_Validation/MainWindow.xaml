@@ -1,0 +1,187 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:SpreadWPF_Validation"
+    xmlns:gss="http://schemas.grapecity.com/windows/spreadsheet/2020" 
+    x:Class="SpreadWPF_Validation.MainWindow"
+    mc:Ignorable="d"
+    Title="SpreadWPF 検証エラー通知" Height="320" Width="455"
+    WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <ComboBox Name="cmbUiType" Margin="5,4,5,6" Width="150" SelectionChanged="cmbUiType_SelectionChanged">
+                <ComboBoxItem Content="Excel互換UI"/>
+                <ComboBoxItem Content="GcSpreadSheet独自UI"/>
+                <ComboBoxItem Content="カスタムUI"/>
+            </ComboBox>
+            <Button Name="btnMark" Margin="5" Content="無効データのマーク" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" Click="btnMark_Click"/>
+            <Button Name="btnUnmark" Margin="5" Content="入力規則マークのクリア" HorizontalAlignment="Left" VerticalAlignment="Top" Width="120" Click="btnUnmark_Click"/>
+        </StackPanel>
+        <gss:GcSpreadSheet x:Name="gcSpreadSheet1" Grid.Row="1" Margin="5"/>
+        <gss:GcSpreadSheet x:Name="gcSpreadSheet2" Grid.Row="1" Margin="5">
+            <gss:GcSpreadSheet.DataValidationTemplate>
+                <DataTemplate DataType="{x:Type gss:DataValidationContext}" >
+                    <gss:ValidationErrorIndicator/>
+                    <!--<gss:ValidationErrorIndicator Background="LimeGreen" 
+                                                    Foreground="White" 
+                                                    BorderBrush="Crimson" 
+                                                    BorderThickness="3"/>-->
+                </DataTemplate>
+            </gss:GcSpreadSheet.DataValidationTemplate>
+        </gss:GcSpreadSheet>
+        <gss:GcSpreadSheet x:Name="gcSpreadSheet3" Grid.Row="1" Margin="5">
+            <gss:GcSpreadSheet.Resources>
+                <ControlTemplate x:Key="ValidationToolTipTemplate" TargetType="ToolTip">
+                    <Grid x:Name="Root" Margin="5,0" Opacity="0" RenderTransformOrigin="0,0">
+                        <Grid.RenderTransform>
+                            <TranslateTransform x:Name="xform" X="-25"/>
+                        </Grid.RenderTransform>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="OpenStates">
+                                <VisualStateGroup.Transitions>
+                                    <VisualTransition GeneratedDuration="0"/>
+                                    <VisualTransition GeneratedDuration="0:0:0.2" To="Open">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0:0:0.2" 
+                                                             To="0" 
+                                                             Storyboard.TargetProperty="X" 
+                                                             Storyboard.TargetName="xform">
+                                                <DoubleAnimation.EasingFunction>
+                                                    <BackEase Amplitude=".3" EasingMode="EaseOut"/>
+                                                </DoubleAnimation.EasingFunction>
+                                            </DoubleAnimation>
+                                            <DoubleAnimation Duration="0:0:0.2" 
+                                                             To="1" 
+                                                             Storyboard.TargetProperty="Opacity" 
+                                                             Storyboard.TargetName="Root"/>
+                                        </Storyboard>
+                                    </VisualTransition>
+                                </VisualStateGroup.Transitions>
+                                <VisualState x:Name="Closed">
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0" 
+                                                         To="0" 
+                                                         Storyboard.TargetProperty="Opacity" 
+                                                         Storyboard.TargetName="Root"/>
+                                    </Storyboard>
+                                </VisualState>
+                                <VisualState x:Name="Open">
+                                    <Storyboard>
+                                        <DoubleAnimation Duration="0" 
+                                                         To="0" 
+                                                         Storyboard.TargetProperty="X" 
+                                                         Storyboard.TargetName="xform"/>
+                                        <DoubleAnimation Duration="0" 
+                                                         To="1" 
+                                                         Storyboard.TargetProperty="Opacity" 
+                                                         Storyboard.TargetName="Root"/>
+                                    </Storyboard>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border CornerRadius="15" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                Background="{TemplateBinding Background}" >
+                            <ContentPresenter/>
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+                <Style TargetType="local:CustomValidationIndicatorControl">
+                    <Style.Triggers>
+                        <Trigger Property="IsEditError" Value="False">
+                            <Setter Property="Background" Value="#FFFFE1" />
+                            <Setter Property="BorderBrush" Value="#5D5D5D"/>
+                            <Setter Property="BorderThickness" Value="1"/>
+                            <Setter Property="Foreground" Value="#5D5D5D"/>
+                        </Trigger>
+                        <Trigger Property="IsEditError" Value="True">
+                            <Setter Property="Background" Value="LightGreen" />
+                            <Setter Property="BorderBrush" Value="Red"/>
+                            <Setter Property="BorderThickness" Value="2"/>
+                            <Setter Property="Foreground" Value="Red"/>
+                        </Trigger>
+                    </Style.Triggers>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="local:CustomValidationIndicatorControl">
+                                <Grid x:Name="Root" >
+                                    <Border x:Name="validationErrorElementBorder" 
+                                            CornerRadius="1" 
+                                            IsHitTestVisible="False">
+                                        <ToolTipService.ToolTip>
+                                            <ToolTip x:Name="ValidationTooltip"                            
+                                     Margin="-2,0,0,0"                                                                         
+                                     Placement="Right"                                      
+                                     PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"                                                      
+                                     IsOpen="{TemplateBinding IsActived}"
+                                     BorderBrush="{TemplateBinding BorderBrush}"
+                                     BorderThickness="{TemplateBinding BorderThickness}"
+                                     Background="{TemplateBinding Background}"                                       
+                                     Template="{StaticResource ValidationToolTipTemplate}">
+                                                <StackPanel>
+                                                    <StackPanel.Resources>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <Trigger Property="Text" Value="">
+                                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                                </Trigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </StackPanel.Resources>
+                                                    <TextBlock   MaxWidth="250" 
+                                                                 Margin="8,4,8,4" 
+                                                                 TextWrapping="Wrap"
+                                                                 Text="{TemplateBinding Title}"  
+                                                                 FontWeight="ExtraBold"  
+                                                                 UseLayoutRounding="false" 
+                                                                 IsEnabled="False" 
+                                                                 Foreground="{TemplateBinding Foreground}"/>
+                                                    <TextBlock  MaxWidth="250" 
+                                                                Margin="8,4,8,4" 
+                                                                TextWrapping="Wrap"
+                                                                Text="{TemplateBinding Message}" 
+                                                                UseLayoutRounding="false" 
+                                                                IsEnabled="False" 
+                                                                Foreground="{TemplateBinding Foreground}"/>
+                                                </StackPanel>
+                                            </ToolTip>
+                                        </ToolTipService.ToolTip>
+                                        <Rectangle HorizontalAlignment="Right" VerticalAlignment="Top" Height="8" Width="8">
+                                            <Rectangle.Style>
+                                                <Style TargetType="Rectangle">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding  IsInvalid}" Value="True">
+                                                            <Setter Property="Fill" Value="orange" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding  IsInvalid}" Value="False">
+                                                            <Setter Property="Visibility" Value="Hidden" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Rectangle.Style>
+                                            <Rectangle.Clip>
+                                                <EllipseGeometry Center="4,4" RadiusX="4" RadiusY="4" />
+                                            </Rectangle.Clip>
+                                        </Rectangle>
+                                    </Border>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </gss:GcSpreadSheet.Resources>
+            <gss:GcSpreadSheet.DataValidationTemplate>
+                <DataTemplate DataType="{x:Type gss:DataValidationContext}" >
+                    <local:CustomValidationIndicatorControl/>
+                </DataTemplate>
+            </gss:GcSpreadSheet.DataValidationTemplate>
+        </gss:GcSpreadSheet>
+    </Grid>
+</Window>
